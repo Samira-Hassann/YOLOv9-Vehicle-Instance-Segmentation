@@ -56,7 +56,8 @@ if uploaded_file is not None:
 
     with col1:
         st.subheader("Original Image")
-        st.image(image, use_column_width=True)
+        # Updated argument here: use_container_width=True
+        st.image(image, use_container_width=True)
 
     # Segmentation trigger
     if st.button("Run Segmentation"):
@@ -74,7 +75,8 @@ if uploaded_file is not None:
 
         with col2:
             st.subheader("Segmentation Result")
-            st.image(res_plotted, use_column_width=True)
+            # Updated argument here: use_container_width=True
+            st.image(res_plotted, use_container_width=True)
 
         # Display detection summary
         st.markdown("---")
