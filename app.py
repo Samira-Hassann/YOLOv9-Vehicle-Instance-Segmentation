@@ -1,4 +1,3 @@
-```python
 import os
 import gdown
 import streamlit as st
