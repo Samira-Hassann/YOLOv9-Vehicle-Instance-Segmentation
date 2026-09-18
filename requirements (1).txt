@@ -1,4 +1,8 @@
-streamlit
 ultralytics
-pillow
+gradio
 opencv-python-headless
+numpy
+pillow
+torch
+torchvision
+gdown
