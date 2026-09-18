@@ -1,49 +1,67 @@
-import streamlit as st
-from ultralytics import YOLO
-from PIL import Image
-import numpy as np
 import os
 import gdown
+import cv2
+import numpy as np
+import streamlit as st
+from PIL import Image
+from ultralytics import YOLO
+
+# Google Drive File Configuration
+DRIVE_FILE_ID = "1beRlmhl1fj-eS7W6jv2awfXNHad_OoHz"
+MODEL_PATH = "best.pt"
 
 # إعدادات الصفحة
 st.set_page_config(
-    page_title="Vehicle Instance Segmentation",
+    page_title="Vehicle Instance Segmentation (YOLOv9)",
     page_icon="🚗",
     layout="centered"
 )
 
-st.title("🚗 Vehicle Instance Segmentation")
-st.write("قم برفع صورة للكشف عن المركبات وتحديد حدودها بدقة باستخدام نموذج YOLOv9.")
+st.title("🚗 Vehicle Instance Segmentation (YOLOv9)")
+st.write("Upload an image to segment vehicles across 5 categories: Car, Bus, Truck, Bicycle, and Motorcycle.")
 
-# تحميل النموذج تلقائياً من Google Drive
+# تحميل وزن الموديل تلقائياً من Google Drive
 @st.cache_resource
 def load_model():
-    model_path = "best.pt"
-    
-    # تحميل الملف من Google Drive إذا لم يكن موجوداً محلياً
-    if not os.path.exists(model_path):
-        file_id = "1beRlmhl1fj-eS7W6jv2awfXNHad_OoHz"
-        url = f"https://drive.google.com/uc?id={file_id}"
-        with st.spinner("جاري تحميل ملف الوزن الخاص بالموديل من Google Drive..."):
-            gdown.download(url, model_path, quiet=False)
-            
-    return YOLO(model_path)
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("Downloading model weights from Google Drive..."):
+            url = f"https://drive.google.com/uc?id={DRIVE_FILE_ID}"
+            gdown.download(url, MODEL_PATH, quiet=False)
+    return YOLO(MODEL_PATH)
 
 model = load_model()
 
-# واجهة رفع الصور
-uploaded_file = st.file_uploader("اختر صورة...", type=["jpg", "jpeg", "png"])
+# شريط ضبط نسبة الثقة (Confidence Threshold)
+conf_threshold = st.slider(
+    "Confidence Threshold",
+    min_value=0.1,
+    max_value=1.0,
+    value=0.25,
+    step=0.05
+)
+
+# رفع الصورة
+uploaded_file = st.file_uploader("Upload Vehicle Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption="الصورة المرفوعة", use_column_width=True)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
     
-    if st.button("تشغيل التقسيم (Segmentation)"):
-        with st.spinner("جاري المعالجة..."):
+    if st.button("Run Segmentation"):
+        with st.spinner("Processing..."):
             img_array = np.array(image)
-            results = model.predict(source=img_array, conf=0.25)
             
-            # عرض النتائج
+            # تشغيل التقسيم باستخدام YOLOv9
+            results = model.predict(
+                source=img_array,
+                conf=conf_threshold,
+                retina_masks=True,
+                verbose=False
+            )
+            
+            # رسم وتجهيز النتائج
             res_plotted = results[0].plot()
-            st.image(res_plotted, caption="نتيجة التقسيم", use_column_width=True)
-            st.success("تم التقسيم بنجاح!")
+            res_rgb = cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB)
+            
+            st.image(res_rgb, caption="Segmentation Output", use_column_width=True)
+            st.success("Segmentation Completed!")
