@@ -1,49 +1,55 @@
-
-
-
-
-import streamlit as st
-from PIL import Image
-import numpy as np
+import os
+import gdown
 import cv2
+import numpy as np
+import gradio as gr
 from ultralytics import YOLO
 
-# ضبط إعدادات الصفحة
-st.set_page_config(page_title="Face Mask Detection", page_icon="😷")
+# Google Drive File Configuration
+DRIVE_FILE_ID = "1beRlmhl1fj-eS7W6jv2awfXNHad_OoHz"
+MODEL_PATH = "best.pt"
 
-st.title("😷 Face Mask Detection System")
-st.write("Upload an image to detect whether people are wearing masks or not.")
+def download_model():
+    """Downloads model weights from Google Drive if not locally present."""
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading model weights from Google Drive...")
+        url = f"https://drive.google.com/uc?id={DRIVE_FILE_ID}"
+        gdown.download(url, MODEL_PATH, quiet=False)
+        print("Model weights downloaded successfully.")
 
-# تحميل النموذج (قم بتغيير 'best.pt' إلى مسار نموذج YOLO الخاص بك)
-@st.cache_resource
-def load_model():
-    return YOLO("best.pt")
+# Initialize Model
+download_model()
+model = YOLO(MODEL_PATH)
 
-try:
-    model = load_model()
-except Exception as e:
-    st.error("لم يتم العثور على ملف النموذج، يرجى التأكد من وجود ملف النموذج (مثل best.pt) في المجلد.")
-
-# أداة رفع الصور
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    # قراءة الصورة بواسطة PIL
-    image = Image.open(uploaded_file)
+def segment_vehicles(image, conf_threshold):
+    """Performs YOLOv9 instance segmentation on input images."""
+    if image is None:
+        return None
     
-    # عرض الصورة الأصلية باستخدام use_container_width المصححة
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    # Run Inference
+    results = model.predict(
+        source=image,
+        conf=conf_threshold,
+        retina_masks=True,
+        verbose=False
+    )
     
-    if st.button("Detect Mask"):
-        with st.spinner("Processing image..."):
-            # تحويل الصورة إلى مصفوفة Numpy لـ OpenCV / YOLO
-            img_array = np.array(image.convert("RGB"))
-            
-            # تشغيل نموذج YOLO للتعرف على الكمامات
-            results = model(img_array)
-            
-            # رسم النتائج على الصورة
-            res_plotted = results[0].plot()
-            
-            # عرض الصورة بعد الاكتشاف
-            st.image(res_plotted, caption="Detection Result", use_container_width=True)
+    # Render Output Mask Overlay
+    res_plotted = results[0].plot()
+    res_rgb = cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB)
+    return res_rgb
+
+# Gradio Interface Build
+demo = gr.Interface(
+    fn=segment_vehicles,
+    inputs=[
+        gr.Image(type="numpy", label="Upload Vehicle Image"),
+        gr.Slider(minimum=0.1, maximum=1.0, value=0.25, step=0.05, label="Confidence Threshold")
+    ],
+    outputs=gr.Image(type="numpy", label="Segmentation Output"),
+    title="🚗 Vehicle Instance Segmentation (YOLOv9)",
+    description="Upload an image to segment vehicles across 5 categories: Car, Bus, Truck, Bicycle, and Motorcycle."
+)
+
+if __name__ == "__main__":
+    demo.launch()
