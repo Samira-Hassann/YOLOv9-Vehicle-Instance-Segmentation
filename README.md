@@ -34,7 +34,7 @@ The dataset was loaded and preprocessed via [Roboflow](https://roboflow.com/) in
 
 ## 🔗 Links & Resources
 * 📓 **Kaggle Notebook:** [Vehicle Instance Segmentation with YOLOv9 Notebook](https://www.kaggle.com/code/samoura/vehicle-instance-segmentation-with-yolov9)
-* 💻 **GitHub Repository:** [YOLOv9-Vehicle-Instance-Segmentation](https://github.com/Samira-Hassann/YOLOv9-Vehicle-Instance-Segmentation)
+* 🌐 **Streamlit App:** [Streamlit Application](https://vehicle-instance-segmentation.streamlit.app/)
 
 ---
 
