@@ -1,18 +1,40 @@
 # 🚗 Vehicle Instance Segmentation with YOLOv9
 
-An end-to-end instance segmentation solution using fine-tuned **YOLOv9** (`yolov9c-seg`) to segment 5 vehicle classes (*Car, Bus, Truck, Bicycle, Motorcycle*).
+![Python](https://img.shields.io/badge/Python-3.12-blue.svg)
+![Ultralytics](https://img.shields.io/badge/Ultralytics-YOLOv9-orange.svg)
+![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)
 
-🚀 **Live Demo:** [Vehicle Segmentation Web App](https://vehicle-instance-segmentation.streamlit.app/)  
-📓 **Kaggle Notebook:** [Vehicle Instance Segmentation with YOLOv9](https://www.kaggle.com/code/samoura/vehicle-instance-segmentation-with-yolov9)
+This repository contains a complete pipeline for fine-tuning and evaluating the **YOLOv9** model (`yolov9c-seg`) for **Vehicle Instance Segmentation** using precise polygon annotation coordinates. The goal is to detect vehicles and delineate their exact boundaries for intelligent transportation systems and autonomous driving.
 
 ---
 
-## 📊 Project Overview
+## 📊 Dataset Summary
+The dataset was loaded and preprocessed via [Roboflow](https://roboflow.com/) in YOLO Segmentation format.
+* **Train Set:** 7,545 images
+* **Validation Set:** 587 images
+* **Test Set:** 193 images
+* **Classes (5 Categories):** `car`, `truck`, `bus`, `bicycle`, `motorcycle`
 
-- **Model Architecture:** YOLOv9c-seg (Instance Segmentation)
-- **Classes:** `Car`, `Bus`, `Truck`, `Bicycle`, `Motorcycle`
-- **Performance:** Achieved **~0.80 Mean Dice Score** on test data.
-- **Deployment:** Interactive web interface with automated model loading.
+---
+
+## 🚀 Key Features & Pipeline
+1. **Dataset Loading & Preprocessing:** Automated dataset download from Roboflow, verification of label files, and handling of image-label pairs.
+2. **Exploratory Data Analysis (EDA):** Extraction of polygon coordinates to visualize ground truth bounding polygons, binary masks, and class distributions.
+3. **Model Training:** Fine-tuning `yolov9c-seg` with Multi-GPU support, Automatic Mixed Precision (AMP), and custom hyperparameters.
+4. **Advanced Evaluation:** Evaluation using standard detection/segmentation metrics (`mAP50`, `mAP50-95`) alongside custom segmentation metrics like **Dice Coefficient** and **Dice Loss**.
+
+---
+
+## 📈 Results & Performance
+* **Mask mAP50:** ~0.749
+* **Mask mAP50-95:** ~0.698
+* **Mean Dice Coefficient (Test Set):** ~0.7997
+
+---
+
+## 🔗 Links & Resources
+* 📓 **Kaggle Notebook:** [Vehicle Instance Segmentation with YOLOv9 Notebook](https://www.kaggle.com/code/samoura/vehicle-instance-segmentation-with-yolov9)
+* 💻 **GitHub Repository:** [YOLOv9-Vehicle-Instance-Segmentation](https://github.com/Samira-Hassann/YOLOv9-Vehicle-Instance-Segmentation)
 
 ---
 
@@ -22,3 +44,5 @@ An end-to-end instance segmentation solution using fine-tuned **YOLOv9** (`yolov
 ├── app.py              # Web deployment interface with automated model download
 ├── requirements.txt    # Python dependencies
 └── README.md           # Project documentation
+
+```
